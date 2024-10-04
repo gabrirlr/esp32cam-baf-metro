@@ -76,7 +76,7 @@ void audio_eof_mp3(const char* info) {
 }
 bool connectToServer() {
   client = BLEDevice::createClient();
-  audio.connecttoFS(SD_MMC, sdAudioFilePath1);
+  
   if (!client->connect(deviceAddress)) {
     Serial.println("Falha na conexão ao dispositivo.");
     return false;
@@ -99,11 +99,18 @@ bool connectToServer() {
   if (remoteCharacteristic->canNotify()) {
     remoteCharacteristic->registerForNotify(notificationCallback);
   }
-  
+
   Serial.println("Conectado e monitorando bafômetro...");
+
+  // Tocar o arquivo de áudio 1 assim que conectar
+  Serial.println("Tocando o áudio 1 ao conectar.");
+  audio.connecttoFS(SD_MMC, sdAudioFilePath1); // Toca o áudio 1
+
   return true;
 }
+
 void setup() {
+
   Serial.begin(115200);
   BLEDevice::init("");
 
@@ -111,6 +118,7 @@ void setup() {
     Serial.println("Tentando novamente em 5 segundos...");
     delay(5000);
   }
+
   if (!SD_MMC.begin("/sdcard", true)) {  
     Serial.println("Falha na inicialização do cartão SD");
     return;
@@ -120,8 +128,10 @@ void setup() {
   audio.setPinout(I2S_BCLK, I2S_LRC, I2S_DOUT);
 
   audio.setVolume(40);  
+  audio.connecttoFS(SD_MMC, sdAudioFilePath1); // Toca o áudio 1
 }
 
 void loop() {
+    
   audio.loop();
 }
